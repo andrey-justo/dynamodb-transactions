@@ -10,7 +10,7 @@ build:
 	./gradlew clean build
 
 start-devenv:
-	$(docker_compose_dev) up -d --build --no-recreatedocker-compose-local.yml
+	$(docker_compose_dev) up -d --build --no-recreate
 
 clear-devenv:
 	$(docker_compose_dev) down -v --remove-orphans
