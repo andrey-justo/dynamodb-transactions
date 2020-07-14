@@ -3,24 +3,60 @@
  */
 package dynamo.account.acid
 
-import io.ktor.application.call
-import io.ktor.http.ContentType
-import io.ktor.response.respondText
-import io.ktor.routing.get
-import io.ktor.routing.routing
+import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
+import com.natpryce.konfig.EnvironmentVariables
+import com.natpryce.konfig.Key
+import com.natpryce.konfig.intType
+import com.natpryce.konfig.overriding
+import dynamo.account.acid.configuration.AccountActionConfig
+import dynamo.account.acid.configuration.DynamoDBConfig.Companion.dynamoConfig
+import dynamo.account.acid.configuration.ProductActionConfig
+import dynamo.account.acid.configuration.RepositoryConfig.Companion.repositoryConfig
+import dynamo.account.acid.configuration.TransactionActionConfig
+import dynamo.account.acid.configuration.route.AccountConfig
+import dynamo.account.acid.configuration.route.ProductConfig
+import dynamo.account.acid.configuration.route.TransactionConfig
+import dynamo.account.acid.route.authentication.AuthModule
+import io.ktor.application.install
+import io.ktor.features.ContentNegotiation
+import io.ktor.gson.gson
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import org.koin.core.context.startKoin
 
-fun main(args: Array<String>) {
-    val server = embeddedServer(Netty, port = 8080) {
-        routing {
-            get("/") {
-                call.respondText("Hello World!", ContentType.Text.Plain)
-            }
-            get("/demo") {
-                call.respondText("HELLO WORLD!")
-            }
+class App {
+  companion object {
+    val config = systemProperties() overriding EnvironmentVariables()
+
+    fun main(args: Array<String>) {
+      startKoin {
+        // use Koin logger
+        printLogger()
+        // declare modules
+        modules(
+          // repository and cloud provider config
+          dynamoConfig,
+          repositoryConfig,
+          // actions and services configuration
+          TransactionActionConfig.actionConfig,
+          AccountActionConfig.actionConfig,
+          ProductActionConfig.actionConfig,
+          // routes config
+          AccountConfig.accountRouteConfig,
+          TransactionConfig.transactionRouteConfig,
+          ProductConfig.productRouteConfig
+        )
+      }
+
+      val authentication = AuthModule(config)
+      val serverPort = Key("SERVER_PORT", intType)
+      val server = embeddedServer(Netty, port = config.getOrElse(serverPort, 8080)) {
+        authentication.add(this)
+        install(ContentNegotiation) {
+          gson {}
         }
+      }
+      server.start(wait = true)
     }
-    server.start(wait = true)
+  }
 }

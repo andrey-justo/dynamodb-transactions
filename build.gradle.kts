@@ -14,6 +14,8 @@ plugins {
 }
 
 val ktorVersion = "1.3.2"
+val awsSdkVersion = "2.13.46"
+val koinVersion = "2.1.5"
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
@@ -34,6 +36,11 @@ dependencies {
 
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-gson:$ktorVersion")
+    implementation("io.ktor:ktor-auth-jwt:$ktorVersion")
+    implementation("software.amazon.awssdk:dynamodb:$awsSdkVersion")
+    implementation("org.koin:koin-core:$koinVersion")
+    implementation("com.natpryce:konfig:1.6.10.0")
 
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
