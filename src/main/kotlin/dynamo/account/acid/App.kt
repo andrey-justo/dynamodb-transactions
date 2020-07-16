@@ -10,14 +10,11 @@ import dynamo.account.acid.configuration.DynamoDBConfig.Companion.dynamoConfig
 import dynamo.account.acid.configuration.ProductActionConfig
 import dynamo.account.acid.configuration.RepositoryConfig.Companion.repositoryConfig
 import dynamo.account.acid.configuration.TransactionActionConfig
-import dynamo.account.acid.configuration.route.ProductConfig
-import dynamo.account.acid.configuration.route.TransactionConfig
 import dynamo.account.acid.route.accountRouting
 import dynamo.account.acid.route.authentication.AuthModule
 import dynamo.account.acid.route.productRouting
 import dynamo.account.acid.route.transactionRouting
 import io.ktor.application.install
-import io.ktor.features.CallLogging
 import io.ktor.features.Compression
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
@@ -46,9 +43,7 @@ fun main(args: Array<String>) {
                 // actions and services configuration
                 TransactionActionConfig.actionConfig,
                 AccountActionConfig.actionConfig,
-                ProductActionConfig.actionConfig,
-                TransactionConfig.transactionRouteConfig,
-                ProductConfig.productRouteConfig
+                ProductActionConfig.actionConfig
         )
     }
 
