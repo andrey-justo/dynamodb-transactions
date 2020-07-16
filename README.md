@@ -81,8 +81,4 @@ For tests:
 
 If you run `./gradlew dependencyCheckAnalyze` you can see if you have any issues in your dependencies. We advice to run it at least once per week
 
-## Documentation
-
-Product documentation can be found in [here](https://docs.google.com/document/d/1BaLwX5d8XZb-xBPl0JU3tuNfsiGdJQot_rskaIMS7O8/edit?ts=5d373bf1#heading=h.h8kwe5jhj7jb)
-
 
