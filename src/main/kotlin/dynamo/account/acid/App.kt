@@ -3,60 +3,72 @@
  */
 package dynamo.account.acid
 
+import com.natpryce.konfig.*
 import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
-import com.natpryce.konfig.EnvironmentVariables
-import com.natpryce.konfig.Key
-import com.natpryce.konfig.intType
-import com.natpryce.konfig.overriding
 import dynamo.account.acid.configuration.AccountActionConfig
 import dynamo.account.acid.configuration.DynamoDBConfig.Companion.dynamoConfig
 import dynamo.account.acid.configuration.ProductActionConfig
 import dynamo.account.acid.configuration.RepositoryConfig.Companion.repositoryConfig
 import dynamo.account.acid.configuration.TransactionActionConfig
-import dynamo.account.acid.configuration.route.AccountConfig
 import dynamo.account.acid.configuration.route.ProductConfig
 import dynamo.account.acid.configuration.route.TransactionConfig
+import dynamo.account.acid.route.accountRouting
 import dynamo.account.acid.route.authentication.AuthModule
+import dynamo.account.acid.route.productRouting
+import dynamo.account.acid.route.transactionRouting
 import io.ktor.application.install
+import io.ktor.features.CallLogging
+import io.ktor.features.Compression
 import io.ktor.features.ContentNegotiation
+import io.ktor.features.DefaultHeaders
 import io.ktor.gson.gson
+import io.ktor.routing.Routing
+import io.ktor.routing.route
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import org.koin.core.context.startKoin
 
-class App {
-  companion object {
-    val config = systemProperties() overriding EnvironmentVariables()
+object App {
+    val config = systemProperties() overriding
+            EnvironmentVariables() overriding
+            ConfigurationProperties.fromResource("defaults.properties")
+}
 
-    fun main(args: Array<String>) {
-      startKoin {
+fun main(args: Array<String>) {
+    val koinApp = startKoin {
         // use Koin logger
         printLogger()
         // declare modules
         modules(
-          // repository and cloud provider config
-          dynamoConfig,
-          repositoryConfig,
-          // actions and services configuration
-          TransactionActionConfig.actionConfig,
-          AccountActionConfig.actionConfig,
-          ProductActionConfig.actionConfig,
-          // routes config
-          AccountConfig.accountRouteConfig,
-          TransactionConfig.transactionRouteConfig,
-          ProductConfig.productRouteConfig
+                // repository and cloud provider config
+                dynamoConfig,
+                repositoryConfig,
+                // actions and services configuration
+                TransactionActionConfig.actionConfig,
+                AccountActionConfig.actionConfig,
+                ProductActionConfig.actionConfig,
+                TransactionConfig.transactionRouteConfig,
+                ProductConfig.productRouteConfig
         )
-      }
-
-      val authentication = AuthModule(config)
-      val serverPort = Key("SERVER_PORT", intType)
-      val server = embeddedServer(Netty, port = config.getOrElse(serverPort, 8080)) {
-        authentication.add(this)
-        install(ContentNegotiation) {
-          gson {}
-        }
-      }
-      server.start(wait = true)
     }
-  }
+
+
+    val authentication = AuthModule(App.config)
+    val serverPort = Key("SERVER_PORT", intType)
+    val server = embeddedServer(Netty, port = App.config.getOrElse(serverPort, 8080)) {
+        authentication.add(this)
+        install(DefaultHeaders)
+        install(Compression)
+        install(ContentNegotiation) {
+            gson {}
+        }
+        install(Routing) {
+            route("api/v1") {
+                accountRouting(koinApp.koin.get(), koinApp.koin.get(), koinApp.koin.get())
+                transactionRouting(koinApp.koin.get(), koinApp.koin.get())
+                productRouting(koinApp.koin.get(), koinApp.koin.get(), koinApp.koin.get())
+            }
+        }
+    }
+    server.start(wait = true)
 }

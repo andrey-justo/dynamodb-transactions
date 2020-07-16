@@ -1,6 +1,5 @@
 package dynamo.account.acid.dao.dynamodb.converter
 
-import com.sun.org.apache.xpath.internal.operations.Or
 import dynamo.account.acid.model.account.Deposit
 import dynamo.account.acid.model.account.Order
 import dynamo.account.acid.model.account.Transaction

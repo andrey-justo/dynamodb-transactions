@@ -11,29 +11,21 @@ import io.ktor.auth.jwt.JWTPrincipal
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
-import io.ktor.routing.get
-import io.ktor.routing.put
-import io.ktor.routing.routing
+import io.ktor.routing.*
 
-// TODO: separate more action into interface -> Impl
-class ProductRoute(
-  private val addGrocery: AddGrocery,
-  private val addMedicine: AddMedicine,
-  private val getProduct: GetProduct
-) {
+fun Route.productRouting(addGrocery: AddGrocery,
+                               addMedicine: AddMedicine,
+                               getProduct: GetProduct) {
+  route("products") {
+    get("{productId}") {
+      val product = getProduct.perform(call.parameters["productId"]!!.toLong())
+      call.respond(product)
+    }
+    put {
+      val principal = call.authentication.principal as? JWTPrincipal
+      principal?.payload?.subject?.let {
 
-  fun Application.accountRouting() {
-    routing {
-      get("/api/v1/products/{productId}") {
-        val product = getProduct.perform(call.parameters["productId"]!!.toLong())
-        call.respond(product)
-      }
-      put("/api/v1/products") {
-        val principal = call.authentication.principal as? JWTPrincipal
-        principal?.payload?.subject?.let {
-
-        } ?: call.respond(HttpStatusCode.Forbidden)
-      }
+      } ?: call.respond(HttpStatusCode.Forbidden)
     }
   }
 }

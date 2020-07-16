@@ -15,12 +15,10 @@ class AuthModule(private val env: Configuration) {
 
   private val jwtIssuer = Key("jwt.domain", stringType)
   private val jwtAudience = Key("jwt.audience", stringType)
-  private val jwtRealm = Key("jwt.realm", stringType)
 
   fun add(application: Application) {
     install(application) {
       jwt {
-        realm = env[jwtRealm]
         verifier(makeJwtVerifier(env[jwtIssuer], env[jwtIssuer]))
         validate { credential ->
           if (credential.payload.audience.contains(env[jwtAudience])) JWTPrincipal(credential.payload) else null

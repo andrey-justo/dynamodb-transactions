@@ -41,6 +41,7 @@ dependencies {
     implementation("software.amazon.awssdk:dynamodb:$awsSdkVersion")
     implementation("org.koin:koin-core:$koinVersion")
     implementation("com.natpryce:konfig:1.6.10.0")
+    implementation("ch.qos.logback:logback-classic:1.2.3")
 
     // Use the Kotlin JDK 8 standard library.
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
