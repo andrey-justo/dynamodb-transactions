@@ -13,7 +13,7 @@ aws --endpoint-url=http://localhost:8000 --region us-east-1 dynamodb update-tabl
 
 aws --endpoint-url=http://localhost:8000 --region us-east-1 dynamodb create-table --table-name Product \
     --attribute-definitions AttributeName=skuOrId,AttributeType=S \
-    --key-schema AttributeName=id,KeyType=HASH \
+    --key-schema AttributeName=skuOrId,KeyType=HASH \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1;
 
 aws --endpoint-url=http://localhost:8000 --region us-east-1 dynamodb create-table --table-name Transaction \
