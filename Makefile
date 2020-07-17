@@ -11,6 +11,8 @@ build:
 
 start-devenv:
 	$(docker_compose_dev) up -d --build --no-recreate
+	sleep 2s # Giving time to all instances are up and running
+	./local-env/populate/dynamodb.sh
 
 clear-devenv:
 	$(docker_compose_dev) down -v --remove-orphans
