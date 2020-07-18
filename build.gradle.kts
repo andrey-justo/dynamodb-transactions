@@ -8,6 +8,7 @@ plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.3.72"
     id("org.jlleitschuh.gradle.ktlint-idea").version("9.2.1")
+    id("jacoco")
 
     // Apply the application plugin to add support for building a CLI application.
     application
@@ -16,6 +17,7 @@ plugins {
 val ktorVersion = "1.3.2"
 val awsSdkVersion = "2.13.46"
 val koinVersion = "2.1.5"
+val junitVersion = "5.6.2"
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions {
@@ -51,9 +53,35 @@ dependencies {
 
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
+    testImplementation("org.mockito:mockito-junit-jupiter:2.23.0")
+    testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
 }
 
 application {
     // Define the main class for the application.
     mainClassName = "dynamo.account.acid.AppKt"
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+    reportsDir = file("$buildDir/codeCoverageReport")
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests are required to run before generating the report
+}
+
+tasks.test {
+    useJUnitPlatform {
+        filter {
+            excludeTags("integration-test")
+        }
+        includeEngines("junit-jupiter")
+    }
+    testLogging {
+        events("passed", "skipped", "failed")
+    }
 }
