@@ -54,6 +54,8 @@ dependencies {
     // Use the Kotlin JUnit integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit")
     testImplementation("org.mockito:mockito-junit-jupiter:2.23.0")
+    testImplementation("org.mockito:mockito-core:3.4.3")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
     testImplementation("org.junit.jupiter:junit-jupiter:$junitVersion")
 }
 
