@@ -20,3 +20,13 @@ aws --endpoint-url=http://localhost:8000 --region us-east-1 dynamodb create-tabl
     --attribute-definitions AttributeName=accountId,AttributeType=S AttributeName=transactionTypeAndId,AttributeType=S \
     --key-schema AttributeName=accountId,KeyType=HASH AttributeName=transactionTypeAndId,KeyType=RANGE \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1;
+
+aws --endpoint-url=http://localhost:8000 --region us-east-1 dynamodb create-table --table-name User \
+    --attribute-definitions AttributeName=userId,AttributeType=S \
+    --key-schema AttributeName=userId,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1;
+
+aws --endpoint-url=http://localhost:8000 --region us-east-1 dynamodb create-table --table-name Credential \
+    --attribute-definitions AttributeName=principal,AttributeType=S AttributeName=type,AttributeType=S \
+    --key-schema AttributeName=principal,KeyType=HASH AttributeName=type,KeyType=RANGE \
+    --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1;

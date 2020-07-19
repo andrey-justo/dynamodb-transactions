@@ -13,25 +13,28 @@ import io.ktor.auth.jwt.jwt
 
 class AuthModule(private val env: Configuration) {
 
-  private val jwtIssuer = Key("jwt.domain", stringType)
-  private val jwtAudience = Key("jwt.audience", stringType)
+    private val jwtIssuer = Key("jwt.domain", stringType)
+    private val jwtAudience = Key("jwt.audience", stringType)
 
-  fun add(application: Application) {
-    install(application) {
-      jwt {
-        verifier(makeJwtVerifier(env[jwtIssuer], env[jwtIssuer]))
-        validate { credential ->
-          if (credential.payload.audience.contains(env[jwtAudience])) JWTPrincipal(credential.payload) else null
+    fun add(application: Application) {
+        install(application) {
+            jwt {
+                verifier(makeJwtVerifier(env[jwtIssuer], env[jwtAudience]))
+                validate { credential ->
+                    if (credential.payload.audience.contains(env[jwtAudience])) JWTPrincipal(credential.payload) else null
+                }
+            }
         }
-      }
     }
-  }
 
-  private val algorithm = Algorithm.HMAC256("secret")
-  private fun makeJwtVerifier(issuer: String, audience: String): JWTVerifier = JWT
-    .require(algorithm)
-    .withAudience(audience)
-    .withIssuer(issuer)
-    .build()
+    private val algorithm = Algorithm.HMAC256("secret")
+    private fun makeJwtVerifier(issuer: String, audience: String): JWTVerifier = JWT
+        .require(algorithm)
+        .withAudience(audience)
+        .withIssuer(issuer)
+        .build()
+
+    fun createJwt(userId: String): String =
+        JWT.create().withIssuer(env[jwtIssuer]).withAudience(env[jwtIssuer]).withSubject(userId).sign(algorithm)
 
 }
