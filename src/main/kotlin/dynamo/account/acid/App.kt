@@ -19,6 +19,9 @@ import dynamo.account.acid.route.authentication.signUpRouting
 import dynamo.account.acid.route.productRouting
 import dynamo.account.acid.route.transactionRouting
 import io.ktor.application.install
+import io.ktor.auth.Authentication
+import io.ktor.auth.jwt.JWTPrincipal
+import io.ktor.auth.jwt.jwt
 import io.ktor.features.Compression
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
@@ -59,8 +62,23 @@ fun main(args: Array<String>) {
 
     val authentication: AuthModule = koinApp.koin.get()
     val serverPort = Key("SERVER_PORT", intType)
-    val server = embeddedServer(Netty, port = App.config.getOrElse(serverPort, 8080)) {
-        authentication.add(this)
+    val server = embeddedServer(Netty, port = config.getOrElse(serverPort, 8080)) {
+        install(Authentication) {
+            jwt {
+                realm = "ktor.io"
+                verifier(
+                    authentication.makeJwtVerifier(
+                        config[authentication.jwtIssuer],
+                        config[authentication.jwtAudience]
+                    )
+                )
+                validate { credential ->
+                    if (credential.payload.audience.contains(config[authentication.jwtAudience])) JWTPrincipal(
+                        credential.payload
+                    ) else null
+                }
+            }
+        }
         install(DefaultHeaders)
         install(Compression)
         install(ContentNegotiation) {
